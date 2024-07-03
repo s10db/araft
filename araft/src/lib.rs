@@ -2,29 +2,8 @@
 #![allow(unused_macros)]
 #![allow(unused)]
 
-macro_rules! one_recv {
-    // case for empty ActorMessage
-    ($cmd:ident, $chan:expr) => {{
-        let (resp_tx, resp_rx) = oneshot::channel();
-        let msg = ActorMessage::$cmd {
-            resp: resp_tx
-        };
-        $chan.send(msg).await.expect("could not send to channel");
-        resp_rx.await
-    }};
-    // case for ActorMessage with members
-    ($cmd:ident, $chan:expr, $($data_name:ident, $data_val:expr),*) => {{
-        let (resp_tx, resp_rx) = tokio::sync::oneshot::channel();
-        let msg = ActorMessage::$cmd {
-            $($data_name: $data_val),*,
-            resp: resp_tx
-        };
-        $chan.send(msg).await.expect("could not send to channel");
-        resp_rx.await.expect("could not send to channel")
-    }};
-}
+use thiserror::Error;
 
-mod actor;
 mod comm;
 mod config;
 mod core;
@@ -33,5 +12,43 @@ mod log;
 mod metal;
 mod state;
 
-pub struct Node;
+#[derive(Error, Debug)]
+pub enum Err {
+    #[error("No peers given")]
+    NoPeers,
+
+    #[error("Number of peers must be even")]
+    InvalidPeerCount,
+
+    #[error("unknown error")]
+    Unknown,
+}
+
+pub struct Node {
+
+}
+
 pub struct Client;
+
+impl Node {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub async fn run(&self,
+                     bind: impl Into<String>, 
+                     port: u16,
+                     id: impl Into<String>,
+                     peers: Vec<String>) -> Result<(), Err>
+    {
+        if peers.is_empty() {
+            return Err(Err::NoPeers);
+        }
+
+        if peers.len() % 2 != 0 {
+            return Err(Err::InvalidPeerCount);
+        }
+
+        Err(Err::Unknown)
+    }
+}

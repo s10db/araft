@@ -39,7 +39,7 @@ async fn main() {
 
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
     const BIN_NAME: &'static str = env!("CARGO_PKG_NAME");
-    tracing::info!("Starting {} version {}...", BIN_NAME, VERSION);
+    tracing::info!("Starting {BIN_NAME} version {VERSION}...");
 
     run(args).await;
 
