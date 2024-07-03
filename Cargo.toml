@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "araft",
-    #"tests/main-test"
+    "tests/test-node",
+    "tests/test-client",
 ]
 resolver = "2"
