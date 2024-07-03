@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package internal;
+
+message AppendEntriesIn {
+    message Entry {
+        message Set {
+            string key = 1;
+            string value = 2;
+        }
+
+        message Remove {
+            string key = 1;
+        }
+
+        oneof operation {
+            Set set = 1;
+            Remove remove = 2;
+        }
+    }
+
+    uint64 term = 1;
+    string leader_id = 2;
+    uint64 prev_log_index = 3;
+    uint64 prev_log_term = 4;
+    repeated Entry entries = 5;
+    uint64 leader_commit = 6;
+}
+
+message AppendEntriesOut {
+    uint64 term = 1;
+    bool success = 2;
+}
+
+message RequestVoteIn {
+    uint64 term = 1;
+    string candidate_id = 2;
+    uint64 last_log_index = 3;
+    uint64 last_log_term = 4;
+}
+
+message RequestVoteOut {
+    uint64 term = 1;
+    bool vote_granted = 2;
+}
+
+message EchoIn {
+    string name = 1;
+}
+
+message EchoOut {
+    string message = 1;
+}
+
+service RaftInternal {
+    rpc AppendEntries(AppendEntriesIn)
+        returns (AppendEntriesOut);
+
+    rpc RequestVote(RequestVoteIn)
+        returns (RequestVoteOut);
+
+    rpc Echo(EchoIn)
+        returns (EchoOut);
+}
