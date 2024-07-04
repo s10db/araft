@@ -5,7 +5,8 @@
 use clap::{Parser, Subcommand};
 
 use araft::Node;
-use araft::Err;
+use araft::NodeErr;
+use araft::{comm, interface};
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -47,18 +48,33 @@ enum Mode {
     Load(LoadArgs),
 }
 
-async fn run_new(args: NewArgs) -> Result<(), Err> {
-    let node = Node::new();
-    node.run(args.rpc_bind_addr, args.rpc_bind_port, args.id, args.peers).await?;
+async fn run_new(args: NewArgs) -> Result<(), NodeErr> {
+    let ncd = araft::NodeConfigData {
+        raft_node_id: args.id,
+        mods: araft::ModConfigData { 
+            comm: comm::Config {
+                peers: args.peers,
+            },
+            interface: interface::Config {
+                cli_bind_addr: args.rpc_bind_addr,
+                cli_bind_port: args.rpc_bind_port 
+            }
+        },
+    };
+    let node = Node::new(ncd);
+
+    node.run().await?;
     Ok(())
 }
 
-async fn run_load(args: LoadArgs) -> Result<(), Err> {
-    Err(Err::Unknown)
+async fn run_load(args: LoadArgs) -> Result<(), NodeErr> {
+    let node = Node::load(args.dump_path_file);
+    node.run().await?;
+    Ok(())
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Err> {
+async fn main() -> Result<(), NodeErr> {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
