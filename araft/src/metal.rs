@@ -26,8 +26,7 @@ pub enum Err {
 }
 
 pub fn write<T>(data: &T, path_file: std::path::PathBuf) -> Result<(), Err>
-    where
-        T: Serialize 
+    where T: Serialize 
 {
     let j = serde_json::to_string(data);
     let Ok(j) = j else {
@@ -54,8 +53,7 @@ pub fn write<T>(data: &T, path_file: std::path::PathBuf) -> Result<(), Err>
 }
 
 pub fn read<T>(path_file: std::path::PathBuf) -> Result<T, Err> 
-    where
-        T: for<'a> Deserialize<'a>
+    where T: for<'a> Deserialize<'a>
 {
     let contents = fs::read_to_string(path_file);
     let Ok(contents) = contents else {

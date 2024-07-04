@@ -13,6 +13,7 @@ pub mod interface;
 mod log;
 mod metal;
 mod state;
+mod storage;
 
 #[derive(Error, Debug)]
 pub enum NodeErr {
