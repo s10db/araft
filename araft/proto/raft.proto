@@ -64,7 +64,7 @@ message EchoOut {
     string message = 1;
 }
 
-service RaftInternal {
+service Raft {
     rpc Command(CommandsIn)
         returns (CommandsOut);
 

@@ -1,13 +1,14 @@
 use serde::{Deserialize, Serialize};
 use ahash::{HashMap, HashMapExt};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Config {
     current_term: u64,
     voted_for: Option<String>,
 }
 
-enum Role {
+#[derive(Clone)]
+pub enum Role {
     Undef,
     Follower,
     Candidate,
@@ -15,8 +16,8 @@ enum Role {
 }
 
 struct LeaderState {
-    pub next_index: HashMap<String, u64>, // node id/index
-    pub match_index: HashMap<String, u64>, // node id/index
+    next_index: HashMap<String, u64>, // node id/index
+    match_index: HashMap<String, u64>, // node id/index
 }
 
 struct State {
@@ -44,5 +45,9 @@ impl Handle {
                 current_role: Role::Follower,
             }
         }
+    }
+
+    pub fn role(&self) -> Role {
+        self.state.current_role.clone()
     }
 }

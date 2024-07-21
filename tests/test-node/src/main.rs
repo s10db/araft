@@ -5,8 +5,8 @@
 use clap::{Parser, Subcommand};
 
 use araft::Node;
-use araft::NodeErr;
-use araft::{comm, interface};
+// use araft::NodeErr;
+// use araft::{comm, interface};
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -48,33 +48,31 @@ enum Mode {
     Load(LoadArgs),
 }
 
-async fn run_new(args: NewArgs) -> Result<(), NodeErr> {
+async fn run_new(args: NewArgs) {
     let ncd = araft::NodeConfigData {
         raft_node_id: args.id,
         mods: araft::ModConfigData { 
-            comm: comm::Config {
+            comm: araft::CommConfig {
                 peers: args.peers,
             },
-            interface: interface::Config {
-                cli_bind_addr: args.rpc_bind_addr,
-                cli_bind_port: args.rpc_bind_port 
-            }
+            interface: araft::InterfaceConfig {
+                cli_addr: format!("{}:{}", args.rpc_bind_addr, args.rpc_bind_port).parse().unwrap()
+            },
+            state: araft::StateConfig::default()
         },
     };
     let node = Node::new(ncd);
 
-    node.run().await?;
-    Ok(())
+    node.run().await;
 }
 
-async fn run_load(args: LoadArgs) -> Result<(), NodeErr> {
+async fn run_load(args: LoadArgs) {
     let node = Node::load(args.dump_path_file);
-    node.run().await?;
-    Ok(())
+    node.run().await;
 }
 
 #[tokio::main]
-async fn main() -> Result<(), NodeErr> {
+async fn main() {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
@@ -83,14 +81,12 @@ async fn main() -> Result<(), NodeErr> {
 
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
     const BIN_NAME: &'static str = env!("CARGO_PKG_NAME");
-    tracing::info!("Starting {BIN_NAME} version {VERSION}...");
+    tracing::info!("starting {BIN_NAME} version {VERSION}...");
 
     match args.mode {
-        Mode::New(a) => run_new(a).await?,
-        Mode::Load(l) => run_load(l).await?,
+        Mode::New(a) => run_new(a).await,
+        Mode::Load(l) => run_load(l).await,
     }
         
     tracing::info!("done, shutdown.");
-
-    Ok(())
 }
